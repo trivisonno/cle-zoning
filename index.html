@@ -165,9 +165,9 @@
 	}
 
 	function updateModal(zoning, parcelpin) {
-		$('#exampleModalLabel').html("Zoning: " + colors[zoning]['name']);
+		$('#exampleModalLabel').html('Parcel '+parcelpin+' <a target="_blank" href="http://neocando.case.edu/cando/propLaunch.jsp?type=aud&parcel='+parcelpin+'"><i class="fa-solid fa-link"></i>MyPlace</a>');
 		
-		popup_data = '<h2>Parcel '+parcelpin+' <a target="_blank" href="http://neocando.case.edu/cando/propLaunch.jsp?type=aud&parcel='+parcelpin+'"><i class="fa-solid fa-link"></i></a></h2><br><div style="overflow:hidden;overflow-y:scroll;"><b>Property Uses:</b><br><table class="table table-striped"><tr>';
+		popup_data = '<h4>Zoning: ' + colors[zoning]['name']+'</h4><br><div style="overflow:hidden;overflow-y:scroll;"><b>Property Uses:</b><br><table class="table table-striped"><tr>';
 
 		for (const [key, value] of Object.entries(permitted_uses_by_zone[zoning])) {
 			if (value == 'P') {
