@@ -38,21 +38,11 @@
 	<div class="modal-dialog modal-lg">
 	  <div class="modal-content">
 		<div class="modal-header">
-		  <h4 class="modal-title" id="exampleModalLabel">Happy Election Day! &#127881;</h4>
+		  <h4 class="modal-title" id="exampleModalLabel"></h4>
 		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		</div>
 		<div class="modal-body">
-		  <p>Thanks for visiting my map! This map uses <a href="https://updates.electionlink.net/widgets/cuyoh/2023-08-08/index.html" target="_blank">real-time voting data</a> shared online by the Cuyahoga Board of Elections.</p>
-		  <h5>New map features this Election:</h5>
-				  <p><div class="progress" style="height:1rem"><div class="progress-bar bg-info" id="timerSample" role="progressbar" style="width:100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><span style="color:#000">Automatic 60sec refresh</span></div></div>
-				  </p>
-				  <p>New map legend colors <span style="color:#FAFAFA">&#9632;</span><span style="color:#E3E3F0">&#9632;</span><span style="color:#C7C7E2">&#9632;</span><span style="color:#ACACD4">&#9632;</span><span style="color:#9090C6">&#9632;</span><span style="color:#7474B8">&#9632;</span><span style="color:#5959AA">&#9632;</span><span style="color:#3D3D9C">&#9632;</span><span style="color:#21218E">&#9632;</span><span style="color:#060680">&#9632;</span></p>
-				  <p>Full-screen mode <i class="fas fa-expand"></i> button for watching all day on larger screens</p>
-				  <p>Precinct/ward toggle <i class="fas fa-sliders-h"></i> button (Cleveland wards only, sorry)</p>
-
-				  <p>For prior elections, the map illustrated voter turnout %s. I've switched to vote totals for this Election, but you'll still find the turnout %s in the infobox!</p>
-		  <h5>Good luck to all campaigns!</h5>
-		  <p><em>-Angelo <a href="https://twitter.com/trivisonno" target="_blank">@Trivisonno <i class="fab fa-twitter"></i></a></em></p>
+		  
 		</div>
 		<div class="modal-footer">
 		  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -100,12 +90,11 @@
         'UX4': {'color': 'afbcc2', 'name': 'UX4 Urban Flex 4'},
         'UX5': {'color': '6f809a', 'name': 'UX5 Urban Flex 5'}
     }
-	const map = L.map('map').setView([41.505493, -81.681290], 13);
+	const map = L.map('map').setView([41.496273, -81.633495], 13);
 
 	const tiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.{ext}', {
 	minZoom: 0,
 	maxZoom: 20,
-	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 	ext: 'png'}).addTo(map);
 
 	// control that shows state info on hover
@@ -176,7 +165,7 @@
 	}
 
 	function updateModal(zoning, parcelpin) {
-		$('#exampleModalLabel').html("Zoning:" + colors[zoning]['name']);
+		$('#exampleModalLabel').html("Zoning: " + colors[zoning]['name']);
 		
 		popup_data = '<h2>Parcel '+parcelpin+' <a target="_blank" href="http://neocando.case.edu/cando/propLaunch.jsp?type=aud&parcel='+parcelpin+'"><i class="fa-solid fa-link"></i></a></h2><br><div style="overflow:hidden;overflow-y:scroll;"><b>Property Uses:</b><br><table class="table table-striped"><tr>';
 
