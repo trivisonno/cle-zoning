@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<base target="_top">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>CLE Form-Based Code</title>
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+	<script src="https://kit.fontawesome.com/a7ec421c16.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+		.leaflet-container {
+			height: 100%;
+			width: 100%;
+			max-width: 100%;
+			max-height: 100%;
+		}
+	</style>
+
+	<style>#map { width: 100%; height: 100%; }
+.info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
+.legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }</style>
+</head>
+<body>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h4 class="modal-title" id="exampleModalLabel">Happy Election Day! &#127881;</h4>
+		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		  <p>Thanks for visiting my map! This map uses <a href="https://updates.electionlink.net/widgets/cuyoh/2023-08-08/index.html" target="_blank">real-time voting data</a> shared online by the Cuyahoga Board of Elections.</p>
+		  <h5>New map features this Election:</h5>
+				  <p><div class="progress" style="height:1rem"><div class="progress-bar bg-info" id="timerSample" role="progressbar" style="width:100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><span style="color:#000">Automatic 60sec refresh</span></div></div>
+				  </p>
+				  <p>New map legend colors <span style="color:#FAFAFA">&#9632;</span><span style="color:#E3E3F0">&#9632;</span><span style="color:#C7C7E2">&#9632;</span><span style="color:#ACACD4">&#9632;</span><span style="color:#9090C6">&#9632;</span><span style="color:#7474B8">&#9632;</span><span style="color:#5959AA">&#9632;</span><span style="color:#3D3D9C">&#9632;</span><span style="color:#21218E">&#9632;</span><span style="color:#060680">&#9632;</span></p>
+				  <p>Full-screen mode <i class="fas fa-expand"></i> button for watching all day on larger screens</p>
+				  <p>Precinct/ward toggle <i class="fas fa-sliders-h"></i> button (Cleveland wards only, sorry)</p>
+
+				  <p>For prior elections, the map illustrated voter turnout %s. I've switched to vote totals for this Election, but you'll still find the turnout %s in the infobox!</p>
+		  <h5>Good luck to all campaigns!</h5>
+		  <p><em>-Angelo <a href="https://twitter.com/trivisonno" target="_blank">@Trivisonno <i class="fab fa-twitter"></i></a></em></p>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		</div>
+	  </div>
+	</div>
+  </div>
+</div>
+
+<div id='map'></div>
+
+<script type="text/javascript" src="js/fbc.js"></script>
+<script type="text/javascript" src="js/permitted-use-table-by-zone.js"></script>
+
+<script type="text/javascript">
+
+	const exampleModal = document.getElementById('exampleModal')
+	var myModal = new bootstrap.Modal(exampleModal, {
+				keyboard: false
+			})
+	
+		
+		
+
+    const colors = {
+        'C3': {'color': 'f1dbda', 'name': 'C3 Community 3'}, 
+        'C4': {'color': 'c4a4a6', 'name': 'C4 Community 4'},
+        'CV': {'color': 'adafaf', 'name': 'CV Civic'}, 
+        'CX3': {'color': 'dbb2b1', 'name': 'CX3 Community Flex 3'}, 
+        'CX4': {'color': 'be7268', 'name': 'CX4 Community Flex 4'},
+        'H3': {'color': 'fef5c4', 'name': 'H3 House 3'},
+        'H4': {'color': 'fbe78b', 'name': 'H4 House 4'},
+        'IX3': {'color': 'b8acb8', 'name': 'IX3 Industrial Flex 3'},
+        'IX5': {'color': '7e7794', 'name': 'IX5 Industrial Flex 5'},
+        'IX7': {'color': '7e7794', 'name': 'IX7 Industrial Flex 7'},
+        'N2.5': {'color': 'f0ca81', 'name': 'N2.5 Neighorhood 2.5'},
+        'NX3': {'color': 'e1a14b', 'name': 'NX3 Neighborhood Flex 3'},
+        'PK': {'color': 'abb687', 'name': 'PK Park'},
+        'UI4': {'color': 'e5ced3', 'name': 'UI4 Urban Innovation 4'},
+        'UIC': {'color': 'c498a8', 'name': 'UIC Urban Innovation Campus'},
+        'UN3': {'color': 'a6c3c0', 'name': 'UN3 Urban Node 3'},
+        'UN4': {'color': '619290', 'name': 'UN4 Urban Node 4'},
+        'UN5': {'color': '3f6b68', 'name': 'UN5 Urban Node 5'},
+        'UX3': {'color': 'cfdce4', 'name': 'UX3 Urban Flex 3'},
+        'UX4': {'color': 'afbcc2', 'name': 'UX4 Urban Flex 4'},
+        'UX5': {'color': '6f809a', 'name': 'UX5 Urban Flex 5'}
+    }
+	const map = L.map('map').setView([41.505493, -81.681290], 13);
+
+	const tiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.{ext}', {
+	minZoom: 0,
+	maxZoom: 20,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'}).addTo(map);
+
+	// control that shows state info on hover
+	const info = L.control();
+
+	info.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info');
+		this.update();
+		return this._div;
+	};
+
+	info.update = function (props) {
+		const contents = props ? `<b>Parcel PIN: ${props.parcelpin}</b><br />Zoning District: ${colors[props.fbc_zoning]['name']}` : 'Hover over a parcel';
+		this._div.innerHTML = `<h4>Cleveland's Form-Based Zoning Code</h4>${contents}`;
+	};
+
+	// info.addTo(map);
+
+
+	// get color depending on population density value
+	function getColor(d) {
+        // console.log(d)
+        return '#'+colors[d]['color'];
+		return d > 1000 ? '#800026' :
+			d > 500  ? '#BD0026' :
+			d > 200  ? '#E31A1C' :
+			d > 100  ? '#FC4E2A' :
+			d > 50   ? '#FD8D3C' :
+			d > 20   ? '#FEB24C' :
+			d > 10   ? '#FED976' : '#FFEDA0';
+	}
+
+	function style(feature) {
+		return {
+			weight: 1,
+			opacity: 1,
+			color: 'gray',
+			dashArray: '3',
+			fillOpacity: 0.7,
+			fillColor: getColor(feature.properties.fbc_zoning)
+		};
+	}
+
+	function highlightFeature(e) {
+		const layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		layer.bringToFront();
+
+		info.update(layer.feature.properties);
+	}
+
+	/* global statesData */
+	const geojson = L.geoJson(fbc, {
+		style,
+		onEachFeature
+	}).addTo(map);
+
+	function resetHighlight(e) {
+		geojson.resetStyle(e.target);
+		info.update();
+	}
+
+	function updateModal(zoning, parcelpin) {
+		$('#exampleModalLabel').html("Zoning:" + colors[zoning]['name']);
+		
+		popup_data = '<h2>Parcel '+parcelpin+' <a target="_blank" href="http://neocando.case.edu/cando/propLaunch.jsp?type=aud&parcel='+parcelpin+'"><i class="fa-solid fa-link"></i></a></h2><br><div style="overflow:hidden;overflow-y:scroll;"><b>Property Uses:</b><br><table class="table table-striped"><tr>';
+
+		for (const [key, value] of Object.entries(permitted_uses_by_zone[zoning])) {
+			if (value == 'P') {
+				text_value = '<i class="fa-regular fa-circle-check"></i></td><td>(P) Permitted'
+			} else if (value == 'C') {
+				text_value = '<i class="fa-solid fa-triangle-exclamation"></i></td><td>(C) Conditional,<br>CPC approval req.'
+			} else if (value == 'P*') {
+				text_value = '<i class="fa-regular fa-circle-check"></i></td><td>(P*) Permitted,<br>w/additional use standards'
+			} else if (value == 'C*') {
+				text_value = '<i class="fa-solid fa-triangle-exclamation"></i></td><td>(C*) Conditional,<br>CPC approval req.<br>w/additional use standards'
+			} else if (value == 'NP') {
+				text_value = '<i class="fa-solid fa-square-xmark"></i></td><td>Variance required'
+			}
+			popup_data += `<td>${key}</td><td> ${text_value}</td></tr>`;
+		}
+		popup_data += "</table>";
+		popup_data += '<img width=100% src="imgs/'+zoning + '-SITE.jpg"><br><img width=100% src="imgs/'+zoning + '-BUILDING.jpg"></div>';
+
+		$('.modal-body').html(popup_data)
+	}
+
+	function openThePopup(e) {
+		updateModal(e.target.feature.properties.fbc_zoning, e.target.feature.properties.parcelpin)
+        myModal.show()
+	}
+
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: openThePopup
+		});
+		
+			// popup_data = '<h2>Parcel '+feature.properties.parcelpin+' <a target="_blank" href="http://neocando.case.edu/cando/propLaunch.jsp?type=aud&parcel='+feature.properties.parcelpin+'"><i class="fa-solid fa-link"></i></a></h2><h3>Zoning: '+colors[feature.properties.fbc_zoning]['name']+'</h3><div style="height:100px;overflow:hidden;overflow-y:scroll;"><b>Property Uses:</b><br><table class="table table-striped">';
+
+			// for (const [key, value] of Object.entries(permitted_uses_by_zone[feature.properties.fbc_zoning])) {
+			// 	if (value == 'P') {
+			// 		text_value = '<i class="fa-regular fa-circle-check"></i></td><td>OK'
+			// 	} else if (value == 'C') {
+			// 		text_value = '<i class="fa-solid fa-triangle-exclamation"></i></td><td>Conditional, CPC approval req.'
+			// 	} else if (value == 'P*') {
+			// 		text_value = '<i class="fa-regular fa-circle-check"></i></td><td>OK, w/rules'
+			// 	} else if (value == 'C*') {
+			// 		text_value = '<i class="fa-solid fa-triangle-exclamation"></i></td><td>Conditional, CPC approval req. & w/rules'
+			// 	} else if (value == 'NP') {
+			// 		text_value = '<i class="fa-solid fa-square-xmark"></i></td><td>Variance req.'
+			// 	}
+			// 	popup_data += `<td>${key}</td><td> ${text_value}</td>`;
+			// }
+			// popup_data += "</table>";
+			// popup_data += '<img width=200 src="imgs/'+feature.properties.fbc_zoning + '-SITE.jpg"><br><img width=200 src="imgs/'+feature.properties.fbc_zoning + '-BUILDING.jpg"></div>';
+			
+			// layer.bindPopup(popup_data, {
+			// 	maxWidth : 560
+			// });
+
+			
+
+			
+		
+	}
+
+	
+
+	const legend = L.control({position: 'bottomright'});
+
+	legend.onAdd = function (map) {
+
+		const div = L.DomUtil.create('div', 'info legend');
+		const grades = [0, 10, 20, 50, 100, 200, 500, 1000];
+		const labels = [];
+        const zones = ['C3', 'C4', 'CV', 'CX3', 'CX4']
+        
+		let from, to;
+
+		// for (let i = 0; i < zones.length; i++) {
+		// 	// from = grades[i];
+		// 	// to = grades[i + 1];
+
+		// 	labels.push(`<i style="background:#${colors[zones[i]]}"></i> ${zones[i]}`);
+		// }
+
+        for (const [key, value] of Object.entries(colors)) {
+            labels.push(`<i style="background:#${value['color']}"></i> ${value['name']}`);
+        }
+
+		div.innerHTML = labels.join('<br>');
+		return div;
+	};
+
+	// legend.addTo(map);
+
+</script>
+
+
+
+</body>
+</html>
