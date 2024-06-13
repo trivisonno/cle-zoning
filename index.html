@@ -183,6 +183,7 @@
 		style,
 		onEachFeature
 	}).addTo(map);
+	map.fitBounds(geojson.getBounds());
 
 	// add zone labels
 	const geojsonZones = L.geoJson(zones, {
