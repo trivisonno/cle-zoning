@@ -178,12 +178,24 @@
 		// info.update(layer.feature.properties);
 	}
 
-	/* global statesData */
-	const geojson = L.geoJson(fbc, {
-		style,
-		onEachFeature
-	}).addTo(map);
-	map.fitBounds(geojson.getBounds());
+	/* load parcels in the FBC areas */
+	var geojson;
+	fetch('js/fbc-parcels.geojson')  // Replace with the path to your GeoJSON file
+		.then(response => {
+			if (!response.ok) {
+				throw new Error("Network response was not ok");
+			}
+			return response.json();
+		})
+		.then(data => {
+			geojson = L.geoJson(data, {
+				style,
+				onEachFeature
+			}).addTo(map);
+			map.fitBounds(geojson.getBounds());
+		});
+		
+	
 
 	// add zone labels
 	const geojsonZones = L.geoJson(zones, {
@@ -198,9 +210,7 @@
 			className: 'geojson-label'
 			}).setContent(feature.properties.fbc_zoning).setLatLng(latLng);
 			layer.bindTooltip(tooltip);
-		}
-				
-		
+		}	
 	}).addTo(map);
 
 	function resetHighlight(e) {
@@ -208,8 +218,8 @@
 		info.update();
 	}
 
-	function updateModal(zoning, parcelpin) {
-		$('#exampleModalLabel').html('Parcel '+parcelpin+' (<a target="_blank" href="http://neocando.case.edu/cando/propLaunch.jsp?type=aud&parcel='+parcelpin+'">MyPlace <i class="fa-solid fa-arrow-up-right-from-square"></i></a>)');
+	function updateModal(zoning, parcelpin, address) {
+		$('#exampleModalLabel').html('Parcel '+parcelpin+' (<a target="_blank" href="http://neocando.case.edu/cando/propLaunch.jsp?type=aud&parcel='+parcelpin+'">MyPlace <i class="fa-solid fa-arrow-up-right-from-square"></i></a>)<br><h6>'+address+'</h6>');
 		
 		popup_data = '<h4>Zoning: <u>' + colors[zoning]['name']+'</u></h4><br><div style="overflow:hidden;overflow-y:scroll;"><b>Property Uses:</b><br><table class="table table-striped"><tr>';
 
@@ -234,7 +244,7 @@
 	}
 
 	function openThePopup(e) {
-		updateModal(e.target.feature.properties.fbc_zoning, e.target.feature.properties.parcelpin)
+		updateModal(e.target.feature.properties.fbc_zoning, e.target.feature.properties.parcelpin, e.target.feature.properties.par_addr_a)
         myModal.show()
 	}
 
