@@ -200,7 +200,9 @@
 	function updateModal(zoning, parcelpin, address) {
 		$('#exampleModalLabel').html('Parcel '+parcelpin+' (<a target="_blank" href="http://neocando.case.edu/cando/propLaunch.jsp?type=aud&parcel='+parcelpin+'">MyPlace <i class="fa-solid fa-arrow-up-right-from-square"></i></a>)<br><h6>'+address+'</h6>');
 		
-		popup_data = '<h4>Zoning: <u>' + colors[zoning]['name']+'</u></h4><br><div style="overflow:hidden;overflow-y:scroll;"><b>Property Uses:</b><br><table class="table table-striped"><tr>';
+
+		popup_data = '<h4>Zoning: <u>' + colors[zoning]['name']+'</u></h4><img width=100% src="imgs/'+zoning + '-INTENT.jpg"><br><img width=100% src="imgs/'+zoning + '-SITE.jpg"><br><img width=100% src="imgs/'+zoning + '-BUILDING.jpg"></div>';
+		popup_data += '<br><hr><div style="overflow:hidden;overflow-y:scroll;"><h4>Property Uses:</h4><br><table class="table table-striped"><tr>';
 
 		for (const [key, value] of Object.entries(permitted_uses_by_zone[zoning])) {
 			if (value == 'P') {
@@ -217,7 +219,6 @@
 			popup_data += `<td>${key}</td><td> ${text_value}</td></tr>`;
 		}
 		popup_data += "</table>";
-		popup_data += '<img width=100% src="imgs/'+zoning + '-INTENT.jpg"><br><img width=100% src="imgs/'+zoning + '-SITE.jpg"><br><img width=100% src="imgs/'+zoning + '-BUILDING.jpg"></div>';
 
 		$('.modal-body').html(popup_data)
 	}
